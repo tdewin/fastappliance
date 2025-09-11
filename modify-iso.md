@@ -129,6 +129,9 @@ virt-install \
 --network network=br0 \
 --noautoconsole
 ```
+
+add `--check disk_size=off` to overprovision
+
 when you are done, you can delete the vm and it disks
 ```bash
 virsh destroy $RNAME; virsh undefine $RNAME --nvram --remove-all-storage
