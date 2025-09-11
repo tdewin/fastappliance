@@ -115,10 +115,9 @@ sudo dd if=$MOD of=/dev/sdc bs=4M status=progress oflag=direct
 Alternatively, test the vm with virsh/virt-install
 
 ```bash
-RNAME=test
 virt-install \
 -n $RNAME \
---description "$(printf 'Veeam Backup & Replication test' $R)" \
+--description "$(printf 'Veeam Backup & Replication auto deploytest %s' $RNAME)" \
 --graphics=spice \
 --boot=uefi \
 --os-variant=rocky9 \
