@@ -84,7 +84,7 @@ $KS
 
 check your changes
 ```bash
-cat hardened-repo-ks.cfg | grep -E '^(network|keyb|time)'
+cat $KS | grep -E '^(network|keyb|time)'
 ```
 
 
@@ -94,14 +94,14 @@ https://docs.rockylinux.org/10/guides/isos/iso_creation/
 https://forums.rockylinux.org/t/create-custom-rocky-iso/7724
 
 ```bash
-sudo mkksiso --ks ./hardened-repo-ks.cfg $JEOS $MOD
+sudo mkksiso --ks $KS $JEOS $MOD
 sudo chown $USER:$USER $MOD
 ```
 
 # Verify the changes
 ```bash
 sudo mount $MOD extract
-cat extract/hardened-repo-ks.cfg | grep -E '^(network|keyb|time)'
+cat extract/$KS | grep -E '^(network|keyb|time)'
 sudo umount $MOD
 ```
 
@@ -118,7 +118,7 @@ Alternatively, test the vm with virsh/virt-install
 RNAME=test
 virt-install \
 -n $RNAME \
---description "$(printf 'Veeam Backup & Replication REPO repo%03d' $R)" \
+--description "$(printf 'Veeam Backup & Replication test' $R)" \
 --graphics=spice \
 --boot=uefi \
 --os-variant=rocky9 \
