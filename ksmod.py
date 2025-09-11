@@ -1,19 +1,43 @@
 #!/usr/bin/env python3
 import argparse
-
+import sys
 
 def main():
     parser = argparse.ArgumentParser(description="Copy lines from input file to backup file.")
     parser.add_argument("input_file", help="Path to the input file")
     parser.add_argument("--output_file","-o", help="Path to the output file, if not set it will do inline replace")
+    parser.add_argument("--backup_file","-b", help="Path to the backup file")
 
-    parser.add_argument("--timezone", default="Etc/UTC --utc", help="Timezone for new system (default: UTC)")
-    parser.add_argument("--timesource", default="time.nist.gov", help="Timesource for new system")
-    parser.add_argument("--keyboard", default="us", help="Keyboard layout")
-    parser.add_argument("--network", default="", help="Keyboard layout")
-    parser.add_argument("--confirm", action="store_true",help="Remove the experimental confirm question")
+    parser.add_argument("--timezone","-t", default="Etc/UTC --utc", help="Timezone for new system (default: UTC)")
+    parser.add_argument("--timesource","-ts", default="time.nist.gov", help="Timesource for new system")
+    parser.add_argument("--keyboard","-k", default="us", help="Keyboard layout")
 
-    parser.add_argument("--backup_file", help="Path to the backup file")
+    parser.add_argument("--network","-n", default="", help="Single network line as defined in kickstart, eg '--bootproto=dhcp'. If empty, nothing is changed")
+
+    parser.add_argument(
+        "--staticip","-s",
+        help="Optional: Static IP address to configure (e.g., 192.168.1.100)"
+    )
+    parser.add_argument(
+        "--subnet","-m",
+        help="Optional: Subnet configuration, works with staticip only",
+        default="255.255.255.0"
+    )
+    parser.add_argument(
+        "--gateway","-gw",
+        help="Optional: Gateway IP address (e.g., 192.168.1.1), works with staticip only"
+    )
+    parser.add_argument(
+        "--dnslist","-ns",
+        help="Optional: Comma-separated list of DNS servers (e.g., 8.8.8.8,8.8.4.4) works with staticip only"
+    )
+    parser.add_argument(
+        "--hostname","-hn",
+        help="Optional: Hostname to assign (e.g., repo001), works with staticip only"
+    )
+
+
+    parser.add_argument("--confirm","-y", action="store_true",help="Remove the experimental confirm question")
     args = parser.parse_args()
 
 
@@ -37,6 +61,13 @@ def main():
     networkline = ""
     if args.network != "":
         networkline = f"network {args.network}\n"
+    
+    if not args.staticip is None:
+        if args.hostname and args.gateway and args.dnslist:
+            networkline = f"network --bootproto=static --ip={args.staticip} --netmask={args.subnet} --gateway={args.gateway} --nameserver={args.dnslist} --hostname={args.hostname}\n"
+        else:
+            print("If you want to configure a static ip, you need to supply hostname, gateway and dnslist.. exiting",file=sys.stderr)
+            return
 
     try:
         # Read lines from input file
@@ -45,7 +76,7 @@ def main():
 
         # Write lines to backup file
         if backup_file:
-          print(f"Making a backup to {backup_file}")
+          print(f"Making a backup to {backup_file}",file=sys.stderr)
           with open(backup_file, 'w') as f:
             f.writelines(lines)
 
@@ -68,20 +99,23 @@ def main():
                       ln = networkline
             
             if ln != "":
-                print(f"Updated {line} to {ln}")
+                print(f"Updated {line} to {ln}",file=sys.stderr)
                 updated_lines.append(ln)
             else:
                 updated_lines.append(line)
 
-        with open(outputfile, 'w') as f:
-            print(f"Writing update to {outputfile}")
+        if outputfile != "-":
+          with open(outputfile, 'w') as f:
+            print(f"Writing update to {outputfile}",file=sys.stderr)
             f.writelines(updated_lines)
+        else:
+            print("".join(updated_lines))
 
 
     except FileNotFoundError:
-        print(f"Error: File {args.input_file} not found.")
+        print(f"Error: File {args.input_file} not found.",file=sys.stderr)
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred: {e}",file=sys.stderr)
 
 if __name__ == "__main__":
         main()
