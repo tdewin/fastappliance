@@ -26,6 +26,12 @@ JEOS=$(realpath $(find -iname '*JeOS*.iso'))
 MOD="${JEOS%.*}.mod.iso"
 ```
 
+if you are trying to mod the Veeam Software Appliance (VBR), you can modify the JEOS variable as such
+```bash
+JEOS=$(realpath $(find -iname 'VeeamSoftwareAppliance*.iso'))
+MOD="${JEOS%.*}.mod.iso"
+```
+
 if everything went ok, you should have the $JEOS set to the fullpath of your iso
 ```bash
 echo "$JEOS"
