@@ -106,6 +106,7 @@ it seems directly calling xorriso might also work.
 ```bash
 sudo xorriso -indev $JEOS \
 -outdev $MOD \
+-boot_image any replay \
 -add $KS
 sudo chown $USER:$USER $MOD
 ```
