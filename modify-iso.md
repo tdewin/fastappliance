@@ -18,7 +18,11 @@ ls *JeOS*
 ```bash
 sudo dnf install -y lorax
 ```
+# remove old mods
 
+```bash
+rm *.mod.iso -i
+```
 
 # setting up path variables
 ```bash
