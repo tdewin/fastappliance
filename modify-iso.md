@@ -26,13 +26,13 @@ rm *.mod.iso -i
 
 # setting up path variables
 ```bash
-JEOS=$(realpath $(find -iname '*JeOS*.iso'))
+JEOS=$(realpath $(find -iname '*JeOS*.iso' | grep -v "[.]mod[.]iso$" | head -n1))
 MOD="${JEOS%.*}.mod.iso"
 ```
 
 if you are trying to mod the Veeam Software Appliance (VBR), you can modify the JEOS variable as such
 ```bash
-JEOS=$(realpath $(find -iname 'VeeamSoftwareAppliance*.iso'))
+JEOS=$(realpath $(find -iname 'VeeamSoftwareAppliance*.iso' | grep -v "[.]mod[.]iso$" | head -n1))
 MOD="${JEOS%.*}.mod.iso"
 ```
 
