@@ -106,12 +106,12 @@ virt-install \
 --ram=4096 \
 --vcpus=4 \
 --disk pool=gnome-boxes,bus=virtio,size=120 \
---disk pool=dataimages,bus=virtio,size=150 \
+--disk pool=gnome-boxes,bus=virtio,size=150 \
 --cdrom $MOD \
 --network network=br0 \
 --noautoconsole
 ```
 when you are done, you can delete the vm and it disks
 ```bash
-virsh destroy $RNAME && virsh undefine $RNAME --nvram --remove-all-storage
+virsh destroy $RNAME; virsh undefine $RNAME --nvram --remove-all-storage
 ```
