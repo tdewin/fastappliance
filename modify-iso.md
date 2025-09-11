@@ -123,8 +123,8 @@ virt-install \
 --os-variant=rocky9 \
 --ram=4096 \
 --vcpus=4 \
---disk pool=gnome-boxes,bus=virtio,size=120 \
---disk pool=gnome-boxes,bus=virtio,size=150 \
+--disk pool=gnome-boxes,bus=virtio,size=240 \
+--disk pool=gnome-boxes,bus=virtio,size=245 \
 --cdrom $MOD \
 --network network=br0 \
 --noautoconsole
