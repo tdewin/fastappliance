@@ -106,7 +106,7 @@ sudo xorriso -indev $JEOS \
 sudo chown $USER:$USER $MOD
 ```
 
-but if you feel more look
+but if you want to still use mkksiso
 ```bash
 sudo mkksiso --ks $KS $JEOS $MOD
 sudo chown $USER:$USER $MOD
