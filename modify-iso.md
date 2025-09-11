@@ -97,12 +97,7 @@ based on:
 https://docs.rockylinux.org/10/guides/isos/iso_creation/
 https://forums.rockylinux.org/t/create-custom-rocky-iso/7724
 
-```bash
-sudo mkksiso --ks $KS $JEOS $MOD
-sudo chown $USER:$USER $MOD
-```
-
-it seems directly calling xorriso might also work.
+it seems directly calling xorriso is better then mkksiso. the problem with mkksiso is that it add's "/hardened-repo-ks.cfg" to every entry in EFI/BOOT/grub.cfg
 ```bash
 sudo xorriso -indev $JEOS \
 -outdev $MOD \
@@ -110,6 +105,14 @@ sudo xorriso -indev $JEOS \
 -add $KS
 sudo chown $USER:$USER $MOD
 ```
+
+but if you feel more look
+```bash
+sudo mkksiso --ks $KS $JEOS $MOD
+sudo chown $USER:$USER $MOD
+```
+
+
 
 # Verify the changes
 ```bash
