@@ -41,12 +41,25 @@ echo "$MOD"
 
 # extracting kickstart
 using cat creates the file with the current user (cp copies the permissions)
+
+```bash
+KS=hardened-repo-ks.cfg
+```
+
+if you are trying to mod the Veeam Software Appliance (VBR)
+```bash
+KS=vbr-ks.cfg
+```
+
+
 ```bash
 mkdir -p extract
 sudo mount $JEOS extract
-cat extract/hardened-repo-ks.cfg > hardened-repo-ks.cfg
+cat extract/$KS > $KS
 sudo umount $JEOS
 ```
+
+
 
 # updating the kickstart
 
