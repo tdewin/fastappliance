@@ -98,6 +98,14 @@ sudo mkksiso --ks $KS $JEOS $MOD
 sudo chown $USER:$USER $MOD
 ```
 
+it seems directly calling xorriso might also work.
+```bash
+sudo xorriso -indev $JEOS \
+-outdev $MOD \
+-add $KS
+sudo chown $USER:$USER $MOD
+```
+
 # Verify the changes
 ```bash
 sudo mount $MOD extract
