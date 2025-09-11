@@ -79,7 +79,7 @@ chmod +x ksmod.py
 --timesource "time.cloudflare.com --nts" \
 --keyboard "be" \
 --network "--bootproto=static --ip=$N.$IP --netmask=$M --gateway=$N.1 --nameserver=$N.1 --hostname=$RNAME" \
-hardened-repo-ks.cfg
+$KS
 ```
 
 check your changes
