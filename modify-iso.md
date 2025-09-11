@@ -2,6 +2,8 @@
 
 These instructions explain how to create a modified iso. You can then copy that iso to a usb stick for example or boot via a remote console from the iso file.
 
+These instructions where tested on a Fedora 42 system, but they should work on other systems as well like Rocky Linux
+
 # Identify iso and usb stick (if you want to copy the image to usb)
 You can use dmesg with -W to follow the kernel log. Do this before plugging in the device and you will be able to identify which /dev name is given to it. Then double check with lsblk.
 
