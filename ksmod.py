@@ -58,7 +58,7 @@ def main():
     args = parser.parse_args()
 
     inputfile = args.input_file
-
+    extractfile = None
     isofile = None
 
     if os.path.isdir(inputfile):
@@ -177,7 +177,7 @@ You can run the following command to build your iso:
 ORIG="{isofile}"
 MOD="{mod}"
 [ -f "$MOD" ] && echo "$MOD Still exists" && rm -i $MOD
-sudo xorriso -indev "$ORIG" -outdev "$MOD" -boot_image any replay -add {outputfile}
+sudo xorriso -indev "$ORIG" -outdev "$MOD" -boot_image any replay -map "{outputfile}" "/{extractfile}" 
 sudo chown $USER:$USER "$MOD"
 """
           print(postisoline)
