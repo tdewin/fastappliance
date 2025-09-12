@@ -66,6 +66,11 @@ def main():
       cfgs = [os.path.join(path, f) for f in os.listdir(path) if f.endswith('.cfg') and os.path.isfile(os.path.join(path, f))]
       inputfile = prompt_user_to_select_file(cfgs) 
     elif os.path.splitext(inputfile)[1].lower() == '.iso':
+      try:
+        t = subprocess.run(["xorriso","--help"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+      except:
+        print("No xorriso detected")
+        return
       result = subprocess.run(
             ['xorriso', '-indev', inputfile, '-ls', '/'],
             stdout=subprocess.PIPE,
