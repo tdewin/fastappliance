@@ -2,7 +2,7 @@
 import argparse
 import sys
 import os
-
+import subprocess
 
 def prompt_user_to_select_file(cfg_files):
     print("Multiple .cfg files found. Please select one to process:", file=sys.stderr)
@@ -59,10 +59,37 @@ def main():
 
     inputfile = args.input_file
 
+    isofile = None
+
     if os.path.isdir(inputfile):
       path = inputfile
       cfgs = [os.path.join(path, f) for f in os.listdir(path) if f.endswith('.cfg') and os.path.isfile(os.path.join(path, f))]
       inputfile = prompt_user_to_select_file(cfgs) 
+    elif os.path.splitext(inputfile)[1].lower() == '.iso':
+      result = subprocess.run(
+            ['xorriso', '-indev', inputfile, '-ls', '/'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+      )
+      isofile = inputfile
+
+      cfgs = [f.strip("'") for f in result.stdout.split("\n") if f.endswith('.cfg\'') ]
+      extractfile = prompt_user_to_select_file(cfgs)
+      extracttmp = f"/tmp/{extractfile}"
+      subprocess.run([
+            'xorriso', '-indev', inputfile , '-osirrox','on',
+            '-extract', f"/{extractfile}", extracttmp
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+      )
+      inputfile = extracttmp
+      isisoextract = True
+
 
 
     if not args.confirm:
@@ -138,6 +165,17 @@ def main():
         else:
             print("".join(updated_lines))
 
+        if not isofile is None and isofile != "":
+          mod = f"{os.path.splitext(isofile)[0]}.mod.iso"
+          postisoline = f"""
+You can run the following command to build your iso:
+ORIG="{isofile}"
+MOD="{mod}"
+[ -f "$MOD" ] && echo "$MOD Still exists" && rm -i $MOD
+sudo xorriso -indev "$ORIG" -outdev "$MOD" -boot_image any replay -add {outputfile}
+sudo chown $USER:$USER "$MOD"
+"""
+          print(postisoline)
 
     except FileNotFoundError:
         print(f"Error: File {args.input_file} not found.",file=sys.stderr)
