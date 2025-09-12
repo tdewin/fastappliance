@@ -1,6 +1,23 @@
 #!/usr/bin/env python3
 import argparse
 import sys
+import os
+
+
+def prompt_user_to_select_file(cfg_files):
+    print("Multiple .cfg files found. Please select one to process:", file=sys.stderr)
+    for i, file_path in enumerate(cfg_files, start=1):
+        print(f"{i}. {os.path.basename(file_path)}", file=sys.stderr)
+    while True:
+        try:
+            choice = int(input("Enter the number of the file to process: ").strip())
+            if 1 <= choice <= len(cfg_files):
+                return cfg_files[choice - 1]
+            else:
+                print("Invalid selection. Try again.", file=sys.stderr)
+        except ValueError:
+            print("Please enter a valid number.", file=sys.stderr)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Copy lines from input file to backup file.")
@@ -40,6 +57,13 @@ def main():
     parser.add_argument("--confirm","-y", action="store_true",help="Remove the experimental confirm question")
     args = parser.parse_args()
 
+    inputfile = args.input_file
+
+    if os.path.isdir(inputfile):
+      path = inputfile
+      cfgs = [os.path.join(path, f) for f in os.listdir(path) if f.endswith('.cfg') and os.path.isfile(os.path.join(path, f))]
+      inputfile = prompt_user_to_select_file(cfgs) 
+
 
     if not args.confirm:
       confirm = input(f"Do you understand this an experimental script only for lab environments (y/n): ").strip().lower()
@@ -53,10 +77,13 @@ def main():
 
     outputfile = args.output_file
     if outputfile is None:
-        outputfile = args.input_file
-        backup_file = args.input_file + ".bkp"
+        outputfile = inputfile
+        backup_file = inputfile + ".bkp"
         if args.backup_file:
           backup_file = args.backup_file
+    elif outputfile != "-" and os.path.isdir(outputfile):
+        basename = os.path.basename(inputfile)
+        outputfile = os.path.join(outputfile,basename)
 
     networkline = ""
     if args.network != "":
@@ -71,7 +98,7 @@ def main():
 
     try:
         # Read lines from input file
-        with open(args.input_file, 'r') as f:
+        with open(inputfile, 'r') as f:
             lines = f.readlines()
 
         # Write lines to backup file
