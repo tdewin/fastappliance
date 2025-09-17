@@ -3,6 +3,7 @@ import argparse
 import sys
 import os
 import subprocess
+import tempfile
 
 def prompt_user_to_select_file(cfg_files):
     print("Multiple .cfg files found. Please select one to process:", file=sys.stderr)
@@ -61,6 +62,13 @@ def main():
     extractfile = None
     isofile = None
 
+
+    outputfile = args.output_file
+
+    grubcfg = f"/EFI/BOOT/grub.cfg"
+    tmpdir = tempfile.TemporaryDirectory(delete=False)
+    grubupdate = os.path.join(tmpdir.name,"grub.cfg")
+
     if os.path.isdir(inputfile):
       path = inputfile
       cfgs = [os.path.join(path, f) for f in os.listdir(path) if f.endswith('.cfg') and os.path.isfile(os.path.join(path, f))]
@@ -82,7 +90,7 @@ def main():
 
       cfgs = [f.strip("'") for f in result.stdout.split("\n") if f.endswith('.cfg\'') ]
       extractfile = prompt_user_to_select_file(cfgs)
-      extracttmp = f"/tmp/{extractfile}"
+      extracttmp = os.path.join(tmpdir.name,extractfile)
       subprocess.run([
             'xorriso', '-indev', inputfile , '-osirrox','on',
             '-extract', f"/{extractfile}", extracttmp
@@ -92,10 +100,69 @@ def main():
             text=True,
             check=True
       )
+
+      subprocess.run([
+            'xorriso', '-indev', inputfile , '-osirrox','on',
+            '-extract', grubcfg, grubupdate
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+      )
+
+
+      with open(grubupdate, 'r') as f:
+        lines = f.readlines()
+
+      updated_lines = []
+
+      linuxefi = None
+      initrdefi = None
+      entry = None
+      p = ""
+      storenext = False
+      for line in lines:
+          ln = line
+          words = line.strip().split()
+          
+          if len(words) > 1:
+           if words[0] == "set":
+            whatset = words[1].split("=")[0].strip()
+            match whatset:
+                case "default":
+                    ln = f'set default="ksmodautomated"\n'
+                case "timeout":
+                    ln = f'set timeout=20\n'
+           elif words[0] == "linuxefi":
+               if extractfile in ln and not "vreins" in ln:
+                   linuxefi = ln
+                   entry = p
+                   storenext = True
+           elif words[0] == "initrdefi" and storenext:
+               initrdefi = ln
+               storenext = False
+
+          p = ln
+          updated_lines.append(ln)
+
+      entrysplit = entry.lstrip().split("'")
+      if linuxefi and initrdefi and entry and len(entrysplit) > 2:
+
+        
+
+          updated_lines.append(f"\n{entrysplit[0]} 'ksmodautomated' {entrysplit[2]}")
+          updated_lines.append(f"  {linuxefi.strip()} inst.assumeyes\n")
+          updated_lines.append(f"  {initrdefi.lstrip()}")
+          updated_lines.append("}\n")
+          with open(grubupdate, 'w') as f:
+            print(f"Writing updated grub to {grubupdate}",file=sys.stderr)
+            f.writelines(updated_lines)
+      else:
+          print("Couldnt find matching entry to clone, will not update grub.cfg")
+
       inputfile = extracttmp
       isisoextract = True
-
-
 
     if not args.confirm:
       confirm = input(f"Do you understand this an experimental script only for lab environments (y/n): ").strip().lower()
@@ -107,7 +174,6 @@ def main():
 
     backup_file = None
 
-    outputfile = args.output_file
     if outputfile is None:
         outputfile = inputfile
         backup_file = inputfile + ".bkp"
@@ -134,7 +200,7 @@ def main():
             lines = f.readlines()
 
         # Write lines to backup file
-        if backup_file:
+        if backup_file and not isisoextract:
           print(f"Making a backup to {backup_file}",file=sys.stderr)
           with open(backup_file, 'w') as f:
             f.writelines(lines)
@@ -177,10 +243,23 @@ You can run the following command to build your iso:
 ORIG="{isofile}"
 MOD="{mod}"
 [ -f "$MOD" ] && echo "$MOD Still exists" && rm -i $MOD
-sudo xorriso -indev "$ORIG" -outdev "$MOD" -boot_image any replay -map "{outputfile}" "/{extractfile}" 
-sudo chown $USER:$USER "$MOD"
+xorriso -indev "$ORIG" -outdev "$MOD" -boot_image any replay -map "{outputfile}" "/{extractfile}" "-map" "{grubupdate}" "{grubcfg}" 
 """
-          print(postisoline)
+          try:
+              print(f'Remastering {mod}')
+              remaster = subprocess.run([
+                    'xorriso', '-indev', isofile , '-outdev',mod,
+                    '-boot_image','any','replay','-map',outputfile,f"/{extractfile}","-map",grubupdate,grubcfg
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    check=True
+              )
+          except subprocess.CalledProcessError as e:
+              print("Couldn't remaster, maybe the existing file still exists")
+              print(e.stderr)
+              print(postisoline)
 
     except FileNotFoundError:
         print(f"Error: File {args.input_file} not found.",file=sys.stderr)
