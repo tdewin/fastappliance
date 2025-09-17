@@ -25,6 +25,7 @@ def main():
     parser.add_argument("input_file", help="Path to the input file")
     parser.add_argument("--output_file","-o", help="Path to the output file, if not set it will do inline replace")
     parser.add_argument("--backup_file","-b", help="Path to the backup file")
+    parser.add_argument("--postmod_file","-p", help="Post installation mod that will appended between %post %end")
 
     parser.add_argument("--timezone","-t", default="Etc/UTC --utc", help="Timezone for new system (default: UTC)")
     parser.add_argument("--timesource","-ts", default="time.nist.gov", help="Timesource for new system")
@@ -229,6 +230,15 @@ def main():
             else:
                 updated_lines.append(line)
 
+        if args.postmod_file:
+          with open(args.postmod_file, 'r') as f:
+            lines = f.readlines()
+            updated_lines.append("\n\n%post\n")
+            for ln in lines:
+              updated_lines.append(ln)
+            updated_lines.append("\n%end\n")
+
+
         if outputfile != "-":
           with open(outputfile, 'w') as f:
             print(f"Writing update to {outputfile}",file=sys.stderr)
@@ -247,10 +257,13 @@ xorriso -indev "$ORIG" -outdev "$MOD" -boot_image any replay -map "{outputfile}"
 """
           try:
               print(f'Remastering {mod}')
-              remaster = subprocess.run([
+              cliargs = [
                     'xorriso', '-indev', isofile , '-outdev',mod,
                     '-boot_image','any','replay','-map',outputfile,f"/{extractfile}","-map",grubupdate,grubcfg
-                    ],
+              ]
+              print("Running:"," ".join(cliargs))
+              remaster = subprocess.run(                    
+                    cliargs,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
@@ -261,8 +274,8 @@ xorriso -indev "$ORIG" -outdev "$MOD" -boot_image any replay -map "{outputfile}"
               print(e.stderr)
               print(postisoline)
 
-    except FileNotFoundError:
-        print(f"Error: File {args.input_file} not found.",file=sys.stderr)
+    except FileNotFoundError as e:
+        print(f"Error: File  not found. {e} ",file=sys.stderr)
     except Exception as e:
         print(f"An error occurred: {e}",file=sys.stderr)
 
