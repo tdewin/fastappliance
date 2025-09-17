@@ -25,7 +25,7 @@ podman run -it --rm -v `pwd`/iso:/iso:z ksmod
 curl -O https://<somethinghere>.veeam.com/<somethinghere>/VeeamJeOS_13.0.0.4967_20250822.iso
 
 touch postmod.cfg
-/app/ksmod.py --postmod postmod.cfg --timezone "Europe/Brussels --utc" --timesource "time.cloudflare.com --nts" VeeamJeOS_13.0.0.4967_20250822.iso --staticip "192.168.0.81" --hostname "autorepo01" --gateway "192.168.0.1" --subnet "255.255.255.0" --dnslist "192.168.0.1"
+/app/ksmod.py --postmod postmod.cfg --keyboard "be" --timezone "Europe/Brussels --utc" --timesource "time.cloudflare.com --nts" VeeamJeOS_13.0.0.4967_20250822.iso --staticip "192.168.0.81" --hostname "autorepo01" --gateway "192.168.0.1" --subnet "255.255.255.0" --dnslist "192.168.0.1"
 
 exit
 ```
