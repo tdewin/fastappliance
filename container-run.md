@@ -30,7 +30,17 @@ touch postmod.cfg
 exit
 ```
 
-# mess around with selinux
+# mess around with selinux if you are using podman
+
+This should not be required if you are running docker and containers as root per default or you don't experience selinux issue
+
+Pre context, if you predownload the iso, or have a a postmod.cfg, you need to put the container context on those files
+```
+chcon -Rt container_file_t iso
+ls -lZ iso
+```
+
+Post generation, you might want to change the context to user_home_t so you can use it. It will move the modded iso outside the folder and change it to the user_home_t context for only that file
 ```
 mv iso/*.mod.iso .
 chcon -t user_home_t *.mod.iso
