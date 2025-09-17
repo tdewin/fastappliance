@@ -25,7 +25,7 @@ def main():
     parser.add_argument("input_file", help="Path to the input file")
     parser.add_argument("--output_file","-o", help="Path to the output file, if not set it will do inline replace")
     parser.add_argument("--backup_file","-b", help="Path to the backup file")
-    parser.add_argument("--postmod_file","-p", help="Post installation mod that will appended between %post %end")
+    parser.add_argument("--postmod_file","-p", help="Post installation mod that will appended between %%post and %%end")
 
     parser.add_argument("--timezone","-t", default="Etc/UTC --utc", help="Timezone for new system (default: UTC)")
     parser.add_argument("--timesource","-ts", default="time.nist.gov", help="Timesource for new system")
