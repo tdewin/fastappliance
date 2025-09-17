@@ -39,6 +39,8 @@ chcon -t user_home_t *.mod.iso
 # virsh test
 ```
 RNAME=testdeploy
-virt-install -n $RNAME --description "$(printf 'Veeam Backup & Replication auto deploytest %s' $RNAME)" --graphics=spice --boot=uefi --os-variant=rocky9 --ram=4096 --vcpus=4 --disk pool=gnome-boxes,bus=virtio,size=240 --disk pool=gnome-boxes,bus=virtio,size=245 --cdrom VeeamJeOS_13.0.0.4967_20250822.mod.iso --network network=br0 --noautoconsole --check disk_size=off
+virt-install -n $RNAME --description "$(printf 'Veeam Backup & Replication auto deploytest %s' $RNAME)" --graphics=spice --boot=uefi --os-variant=rocky9 --ram=4096 --vcpus=4 --disk pool=gnome-boxes,bus=virtio,size=240 --disk pool=gnome-boxes,bus=virtio,size=245 --cdrom VeeamJeOS_13.0.0.4967_20250822.mod.iso --network network=br0 --check disk_size=off
+# when you are done
+# virsh destroy $RNAME; virsh undefine --nvram --remove-all-storage $RNAME
 ```
 
